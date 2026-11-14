@@ -31,18 +31,29 @@ jobs:
             echo "ERRO: Arquivo ZIP não encontrado!"
             exit 1
           fi
-
+          
       - name: Compilar
         run: |
           export THEOS=$HOME/theos
 
           unzip -o projectantigo_sem_links.zip
 
-          cd "ARIYAN IOS"
+          # Renomear pasta para remover espaços
+          mv "ARIYAN IOS" ARIYAN_IOS
 
+          cd ARIYAN_IOS
+
+          # Corrigir caminho do Theos no Makefile
           sed -i '' 's#/var/theos/makefiles/common.mk#$(THEOS)/makefiles/common.mk#' Makefile
 
+          # Compilar e gerar pacote DEB
           gmake clean package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: "ARIYAN_IOS/packages/*.deb"
+
 
       - uses: actions/upload-artifact@v4
         with:
