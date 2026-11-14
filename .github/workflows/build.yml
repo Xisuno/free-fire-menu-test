@@ -32,23 +32,36 @@ jobs:
             exit 1
           fi
           
+      
       - name: Compilar
         run: |
           export THEOS=$HOME/theos
 
           unzip -o projectantigo_sem_links.zip
 
-          # Renomear pasta para remover espaços
-          mv "ARIYAN IOS" ARIYAN_IOS
+          # Verificar nome da pasta
+          if [ -d "ARIYAN IOS" ]; then
+            mv "ARIYAN IOS" ARIYAN_IOS
+          fi
+
+          if [ ! -d "ARIYAN_IOS" ]; then
+            echo "ERRO: Pasta ARIYAN_IOS não encontrada!"
+            exit 1
+          fi
 
           cd ARIYAN_IOS
 
-          # Corrigir caminho do Theos no Makefile
+          # Corrigir caminho do Theos
           sed -i '' 's#/var/theos/makefiles/common.mk#$(THEOS)/makefiles/common.mk#' Makefile
 
-          # Compilar e gerar pacote DEB
+          # Compilar
           gmake clean package
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: "ARIYAN_IOS/packages/*.deb"
+          
       - uses: actions/upload-artifact@v4
         with:
           name: deb
